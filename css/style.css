@@ -1,0 +1,31 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Helvetica, "Times New Roman", Times, serif;
+  font-size: 12px;
+  color: #333333;
+  background-color: #dc0606;
+  background-image: url('/img/bg-red-characters.png');
+  background-position: top left;
+  background-repeat: repeat;
+}
+
+#container {
+  width: 1298px;
+  margin: 0 auto;
+  position: relative;
+  background-color: #fff;
+  padding:0;
+}
+
+header {
+    display: block;
+    padding: 20px 0 0 0;
+}
+
+header h1 {
+    height: 118px;
+    background: url('/img/logo.png') top left no-repeat;
+    margin: 0;
+    padding: 0 0 0 150px;
+}
