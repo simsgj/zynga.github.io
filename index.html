@@ -1,7 +1,16 @@
 ---
 layout: default
 ---
-<h1>Leaderboard</h1>
+<h1 class="topten">Top 10 Repos</h1>
+<nav id="leaderboardNav">
+    <ul>
+        <li class="active" data-filter="forks">By Forks</li>
+        <li data-filter="watchers">By Watchers</li>
+        <li data-filter="watchfork">By Watchers &amp; Forks</li>
+        <li data-filter="recent">Most Recent</li>
+        <li data-filter="weighted">Weighted</li>
+    </ul>
+</nav>
 <ol id="leaderboard">
-<ol>
+</ol>
 <script src="script/leaderboard.js"></script>

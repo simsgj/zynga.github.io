@@ -1,9 +1,12 @@
 (function(window, document, $, undefined) {
 
+    // TODO: Repos should be cached
+
     $(document).ready(function() {
 
         var orgs = ['orgs/zynga', 'orgs/playscript', 'users/cocos2d'];
         var blacklist = ['gh-pages-template', 'jasy-compat'];
+        var weightFunction = 'forks';
 
         function fetchRepos(orgs, callback, scope) {
             var deferredCalls = [];
@@ -27,54 +30,93 @@
             var container = $('#leaderboard');
             container.empty();
 
-            for (var i = 0, iLen = repos.length; i < iLen; i++) {
+            for (var i = 0, iLen = (repos.length > 10 ? 10 : repos.length); i < iLen; i++) {
                 var repo = repos[i];
                 var elem = $(
-                    '<li class="' + (repo.language || '').toLowerCase() + '">' +
-                    '<a href="' + repo.owner.html_url + '"><img class="owner-image" src="' + repo.owner.avatar_url + '" title="' + repo.owner.login + '" /></a>' +
-                    '<a href="' + (repo.homepage ? repo.homepage : repo.html_url) + '">' + repo.name + '</a><br />' +
+                    '<li class="' + (repo.language || '').toLowerCase() + ' place' + (i + 1) + '">' +
+                    '<a href="' + (repo.homepage ? repo.homepage : repo.html_url) + '">' +
+                    '<span class="place place' + (i + 1) + '">' + (i + 1) + '</span>' +
+                    '<span class="name">' + repo.full_name + '</span><br />' +
                     repo.description + '<br />' +
                     'Forks: ' + repo.forks + ', Watchers: ' + repo.watchers + ', Open Issues: ' + repo.open_issues + ', Last Updated: ' + $.timeago(repo.updated_at) +
+                    '<span class="score">' + repo.leaderboardScore + '</span>' +
+                    '</a>' +
                     '</li>');
                 container.append(elem);
             }
         }
 
-        fetchRepos(orgs, function(repos) {
+        var updateLeaderboard = window.updateLeaderboard = function(weight) {
+            weightFunction = weight || weightFunction;
 
-            repos = repos.filter(function(element, index, array) {
+            fetchRepos(orgs, function(repos) {
 
-                if (element.fork) {
-                    return false;
+                repos = repos.filter(function(element, index, array) {
+
+                    if (element.fork) {
+                        return false;
+                    }
+
+                    if (element.name.indexOf('.github.com') > 0) {
+                        return false;
+                    }
+
+                    if (element.name.indexOf('.github.io') > 0) {
+                        return false;
+                    }
+
+                    if (blacklist.indexOf(element.name) >= 0) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                function getWeight(repo) {
+                    switch (weightFunction) {
+                        case 'forks':
+                            repo.leaderboardScore = repo.forks;
+                            break;
+
+                        case 'watchers':
+                            repo.leaderboardScore = repo.watchers;
+                            break;
+
+                        case 'watchfork':
+                            repo.leaderboardScore = repo.forks + repo.watchers;
+                            break;
+
+                        case 'recent':
+                            repo.leaderboardScore = '';
+                            return (new Date(repo.updated_at).getTime());
+                            break;
+                        case 'weighted':
+                        default:
+                            // forks * 3 + watchers - last update days * 5
+                            repo.leaderboardScore = (repo.forks * 3) + repo.watchers - (Math.floor((Date.now() - new Date(repo.updated_at).getTime()) / 86400000) * 5);
+                            break;
+                    }
+
+                    return repo.leaderboardScore;
                 }
 
-                if (element.name.indexOf('.github.com') > 0) {
-                    return false;
-                }
+                repos.sort(function(a, b) {
+                    return getWeight(b) - getWeight(a);
+                });
 
-                if (element.name.indexOf('.github.io') > 0) {
-                    return false;
-                }
+                renderLeaderboard(repos);
 
-                if (blacklist.indexOf(element.name) >= 0) {
-                    return false;
-                }
+            }, this);
+        }
 
-                return true;
-            });
+        updateLeaderboard();
 
-            function getWeight(repo) {
-                // forks * 3 + watchers - last update days * 5
-                return (repo.forks * 3) + repo.watchers - (Math.floor((Date.now() - new Date(repo.updated_at).getTime()) / 86400000) * 5);
-            }
-
-            repos.sort(function(a, b) {
-                return getWeight(b) - getWeight(a);
-            });
-
-            renderLeaderboard(repos);
-
-        }, this);
+        $('#leaderboardNav li').click(function() {
+            updateLeaderboard(this.getAttribute('data-filter'));
+            $('#leaderboardNav li').removeClass('active');
+            $(this).addClass('active');
+            document.selection.empty();
+        });
 
     });
 
