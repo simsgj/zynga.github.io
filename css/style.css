@@ -199,6 +199,13 @@ header h2 {
     right: 5px;
 }
 
+#leaderboard .place1 .score {
+    text-align: right;
+    background: url('/img/trophy.png') left top no-repeat;
+    width: 97px;
+    height: 36px;
+}
+
 #leaderboard span.place {
     position: absolute;
     top: 12px;
