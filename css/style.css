@@ -265,3 +265,23 @@ header h2 {
     background-position: -251px 0;
     width: 32px;
 }
+
+#leaderboardShowAllContainer {
+    text-align: center;
+    padding: 15px;
+}
+
+#leaderboardShowAll {
+    border: 1px solid #e6e6e6;
+    background-color: #fcfcfc;
+    background: url('/img/rt-arrow.png') 15px center no-repeat;
+    color: #1992d1;
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 10px 15px 10px 42px;
+    cursor: pointer;
+}
+
+#leaderboardShowAll:hover {
+    background-color: #f4f9fd;
+}

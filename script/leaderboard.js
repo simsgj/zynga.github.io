@@ -1,20 +1,24 @@
 (function(window, document, $, undefined) {
 
-    // TODO: Repos should be cached
-
     $(document).ready(function() {
 
         var orgs = ['orgs/zynga', 'orgs/playscript', 'users/cocos2d'];
         var blacklist = ['gh-pages-template', 'jasy-compat'];
         var weightFunction = 'forks';
+        var showAll = false;
+        var repos = [];
 
         function fetchRepos(orgs, callback, scope) {
+            if (repos.length) {
+                callback.call(scope);
+            }
+
             var deferredCalls = [];
             for (var i = 0, iLen = orgs.length; i < iLen; i++) {
                 deferredCalls.push($.getJSON('https://api.github.com/' + orgs[i] + '/repos'));
             }
 
-            var repos = [];
+            repos = [];
             $.when.apply($, deferredCalls).done(function() {
                 for (var i = 0, iLen = arguments.length; i < iLen; i++) {
                     if (arguments[i][1] !== 'success') {
@@ -22,34 +26,42 @@
                     }
                     repos = repos.concat(arguments[i][0]);
                 }
-                callback.call(scope, repos);
+                callback.call(scope);
             });
         }
 
-        function renderLeaderboard(repos) {
+        function renderLeaderboard() {
             var container = $('#leaderboard');
             container.empty();
 
-            for (var i = 0, iLen = (repos.length > 10 ? 10 : repos.length); i < iLen; i++) {
+            for (var i = 0, iLen = (showAll ? repos.length : (repos.length > 10 ? 10 : repos.length)); i < iLen; i++) {
                 var repo = repos[i];
                 var elem = $(
                     '<li class="' + (repo.language || '').toLowerCase() + ' place' + (i + 1) + '">' +
                     '<a href="' + (repo.homepage ? repo.homepage : repo.html_url) + '">' +
-                    '<span class="place place' + (i + 1) + '">' + (i + 1) + '</span>' +
+                    (i > 9 ? '' : '<span class="place place' + (i + 1) + '">' + (i + 1) + '</span>') +
                     '<span class="name">' + repo.full_name + '</span><br />' +
                     repo.description + '<br />' +
                     'Forks: ' + repo.forks + ', Watchers: ' + repo.watchers + ', Open Issues: ' + repo.open_issues + ', Last Updated: ' + $.timeago(repo.updated_at) +
-                    '<span class="score">' + repo.leaderboardScore + '</span>' +
+                    (i > 9 ? '' : '<span class="score">' + repo.leaderboardScore + '</span>') +
                     '</a>' +
                     '</li>');
                 container.append(elem);
             }
+
+            if (showAll) {
+                $('#leaderboardShowAll').text('View only top ten repos');
+            }
+            else {
+                $('#leaderboardShowAll').text('View all ' + repos.length + ' repos');
+            }
         }
 
         var updateLeaderboard = window.updateLeaderboard = function(weight) {
+
             weightFunction = weight || weightFunction;
 
-            fetchRepos(orgs, function(repos) {
+            fetchRepos(orgs, function() {
 
                 repos = repos.filter(function(element, index, array) {
 
@@ -115,7 +127,11 @@
             updateLeaderboard(this.getAttribute('data-filter'));
             $('#leaderboardNav li').removeClass('active');
             $(this).addClass('active');
-            document.selection.empty();
+        });
+
+        $('#leaderboardShowAll').click(function() {
+            showAll = !showAll;
+            updateLeaderboard();
         });
 
     });
