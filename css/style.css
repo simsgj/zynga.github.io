@@ -176,7 +176,7 @@ header h2 {
 #leaderboard a {
     font-size: 14px;
     line-height: 21px;
-    padding: 12px 0 12px 50px;
+    padding: 12px 50px 12px 50px;
     border-bottom: 1px solid #e6e6e6;
     color: #777;
     text-decoration: none;
@@ -184,7 +184,7 @@ header h2 {
 }
 
 #leaderboard .place1 a {
-/*    border-top: 1px solid #e6e6e6;*/
+    padding-right: 110px
 }
 
 #leaderboard a:hover {
